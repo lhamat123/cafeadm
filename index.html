@@ -2,846 +2,369 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Café Roble</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Maps Picker → Embed</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  :root{
-    --bd:#2C1A0E;--bm:#3D2210;--bl:#8B5E2F;
-    --gold:#C9A87C;--cream:#F5ECD7;--cs:#FDF6EC;
-    --text:#1a1008;--muted:#6b5340;--bdr:rgba(201,168,124,0.25);
-  }
-  body{font-family:'Lato',sans-serif;background:var(--cs);color:var(--text);overflow-x:hidden}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0e0f11;--surface:#16181c;--surface2:#1e2026;
+      --border:rgba(255,255,255,0.08);--accent:#4ade80;
+      --accent-dim:rgba(74,222,128,0.12);--text:#f0f0ee;--muted:#7a7d87;
+      --mono:'DM Mono',monospace;--display:'Syne',sans-serif;
+    }
+    html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--display);}
+    body{display:flex;flex-direction:column;min-height:100vh;padding:0;}
 
-  /* ── PAGES ── */
-  .page{display:none}.page.active{display:block}
+    /* Top bar */
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:14px 20px;
+      background:var(--surface);
+      border-bottom:1px solid var(--border);
+      gap:12px; flex-wrap:wrap;
+    }
+    .topbar-title{font-size:16px;font-weight:700;white-space:nowrap;}
+    .topbar-title span{color:var(--accent);}
 
-  /* ── BANNER ── */
-  .banner{background:var(--bd);display:flex;align-items:center;min-height:68px;
-    cursor:pointer;text-decoration:none;position:relative;overflow:hidden;transition:filter .18s}
-  .banner:hover{filter:brightness(1.1)}
-  .banner::before{content:'';position:absolute;inset:0;pointer-events:none;
-    background:repeating-linear-gradient(45deg,transparent,transparent 18px,rgba(255,255,255,.014) 18px,rgba(255,255,255,.014) 36px)}
-  .banner-photo{width:84px;height:68px;object-fit:cover;flex-shrink:0;display:block}
-  .banner-body{flex:1;padding:0 .9rem;position:relative;z-index:1;min-width:0;display:flex;flex-direction:column;gap:3px}
-  .banner-name{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;
-    color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .banner-sub{font-size:.62rem;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;
-    font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .banner-action{flex-shrink:0;padding:0 .9rem;position:relative;z-index:1;
-    display:flex;flex-direction:column;align-items:center;gap:3px;
-    border-left:1px solid rgba(201,168,124,.2)}
-  .banner-action-icon{font-size:1rem;line-height:1}
-  .banner-action-label{font-size:.52rem;font-weight:700;letter-spacing:.09em;
-    text-transform:uppercase;color:var(--gold);white-space:nowrap}
+    /* Search */
+    .search-wrap{display:flex;gap:8px;flex:1;max-width:420px;}
+    .search-wrap input{
+      flex:1;background:var(--surface2);border:1px solid var(--border);
+      border-radius:8px;padding:9px 13px;font-family:var(--mono);font-size:13px;
+      color:var(--text);outline:none;transition:border-color 0.15s;
+    }
+    .search-wrap input:focus{border-color:var(--accent);}
+    .search-wrap input::placeholder{color:var(--muted);}
+    .btn-search{
+      padding:9px 16px;font-family:var(--display);font-size:13px;font-weight:600;
+      color:#0a0b0d;background:var(--accent);border:none;border-radius:8px;
+      cursor:pointer;white-space:nowrap;transition:opacity 0.15s;
+    }
+    .btn-search:hover{opacity:0.88;}
 
-  /* ── ADMIN BUTTON (floating) ── */
-  #adminBtn{
-    position:fixed;bottom:1rem;right:1rem;z-index:500;
-    background:#1a1a2e;color:var(--gold);border:1.5px solid var(--gold);
-    padding:8px 14px;border-radius:30px;font-family:'Lato',sans-serif;
-    font-size:.72rem;font-weight:700;letter-spacing:.07em;cursor:pointer;
-    box-shadow:0 4px 16px rgba(0,0,0,.3);transition:all .18s;
-  }
-  #adminBtn:hover{background:var(--gold);color:var(--bd)}
+    /* GPS btn */
+    .btn-gps{
+      display:flex;align-items:center;gap:6px;
+      padding:9px 14px;font-family:var(--display);font-size:13px;font-weight:600;
+      color:var(--accent);background:var(--accent-dim);
+      border:1px solid rgba(74,222,128,0.25);border-radius:8px;
+      cursor:pointer;white-space:nowrap;transition:background 0.15s;
+    }
+    .btn-gps:hover{background:rgba(74,222,128,0.2);}
+    .btn-gps:disabled{opacity:0.4;cursor:not-allowed;}
 
-  /* ── CAT NAV ── */
-  .cat-nav-wrap{background:var(--bm);padding:.75rem 0;position:relative}
-  .cat-nav-wrap::before,.cat-nav-wrap::after{content:'';position:absolute;top:0;bottom:0;
-    width:52px;z-index:2;pointer-events:none}
-  .cat-nav-wrap::before{left:0;background:linear-gradient(to right,var(--bm) 30%,transparent)}
-  .cat-nav-wrap::after{right:0;background:linear-gradient(to left,var(--bm) 30%,transparent)}
-  .cat-nav{display:flex;gap:9px;overflow-x:auto;scroll-behavior:smooth;scrollbar-width:none;
-    padding:0 52px;justify-content:safe center}
-  .cat-nav::-webkit-scrollbar{display:none}
-  .cat-btn{flex-shrink:0;padding:5px 16px;border-radius:20px;
-    border:1.5px solid rgba(201,168,124,.45);background:transparent;color:var(--gold);
-    font-family:'Lato',sans-serif;font-size:.74rem;font-weight:700;letter-spacing:.07em;
-    text-transform:uppercase;cursor:pointer;white-space:nowrap;
-    transition:background .18s,color .18s,border-color .18s}
-  .cat-btn:hover,.cat-btn.active{background:var(--gold);color:var(--bd);border-color:var(--gold)}
-  .swipe-hint{text-align:center;font-size:.68rem;color:var(--muted);letter-spacing:.06em;
-    padding:.5rem 0 0;transition:opacity .5s;user-select:none}
-  .swipe-hint.hidden{opacity:0;pointer-events:none}
+    /* Layout */
+    .main{display:flex;flex:1;overflow:hidden;}
 
-  /* ── SLIDER ── */
-  .slider-vp{overflow:hidden;width:100%;cursor:grab}
-  .slider-vp.grabbing{cursor:grabbing}
-  .slider-track{position:relative;width:100%}
-  .slide-panel{position:absolute;top:0;left:0;width:100%;padding:.4rem 1.2rem 2.5rem;will-change:transform}
-  @media(min-width:860px){
-    .slide-panel{padding-left:calc((100vw - 860px)/2 + 1.2rem);
-      padding-right:calc((100vw - 860px)/2 + 1.2rem)}
-  }
+    /* Map */
+    #map{flex:1;min-height:400px;cursor:crosshair;}
+    .leaflet-container{background:#1a1c1f;}
 
-  /* ── SECTION TITLE ── */
-  .sec-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:600;
-    color:var(--bd);padding:.5rem 0 .6rem;border-bottom:2px solid var(--gold);
-    margin-bottom:.4rem}
+    /* Sidebar */
+    .sidebar{
+      width:320px;min-width:280px;
+      background:var(--surface);
+      border-left:1px solid var(--border);
+      display:flex;flex-direction:column;
+      overflow-y:auto;
+    }
+    .sidebar-section{padding:16px 18px;border-bottom:1px solid var(--border);}
+    .sidebar-section:last-child{border-bottom:none;}
+    .section-label{font-size:11px;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
 
-  /* ── ITEM ROWS ── */
-  .items-list{display:flex;flex-direction:column}
-  .item-row{display:flex;align-items:center;gap:.9rem;padding:.8rem .3rem;
-    border-bottom:1px solid var(--bdr);border-radius:8px;transition:background .15s}
-  .item-row:last-child{border-bottom:none}
-  .item-row:hover{background:rgba(201,168,124,.09)}
-  .item-thumb{width:62px;height:62px;border-radius:9px;overflow:hidden;
-    flex-shrink:0;position:relative;cursor:pointer}
-  .item-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .22s}
-  .item-thumb:hover img{transform:scale(1.08)}
-  .badge{position:absolute;top:-4px;right:-4px;background:var(--gold);color:var(--bd);
-    font-size:.5rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
-    padding:2px 5px;border-radius:20px;white-space:nowrap;z-index:2}
-  .item-info{flex:1;min-width:0}
-  .item-name{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:600;
-    color:var(--bd);margin-bottom:.18rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .item-desc{font-size:.74rem;color:var(--muted);line-height:1.5;
-    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .item-right{flex-shrink:0;padding-left:.4rem}
-  .price{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;
-    color:var(--bl);white-space:nowrap}
+    /* Coords display */
+    .coord-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;}
+    .coord-key{font-size:12px;color:var(--muted);}
+    .coord-val{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);}
 
-  /* ── PANEL GALLERY ── */
-  .panel-gal{margin-top:1.4rem;padding-top:1rem;border-top:1.5px solid var(--bdr)}
-  .panel-gal-title{font-family:'Playfair Display',serif;font-size:.88rem;font-weight:600;
-    color:var(--muted);margin-bottom:.7rem;letter-spacing:.04em}
-  .panel-gal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}
-  .pgc{display:flex;flex-direction:column;gap:.32rem;cursor:pointer}
-  .pgc-img{width:100%;aspect-ratio:4/3;border-radius:7px;overflow:hidden}
-  .pgc-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .22s}
-  .pgc:hover .pgc-img img{transform:scale(1.05)}
-  .pgc-cap{font-size:.67rem;color:var(--muted);line-height:1.35;text-align:center;padding:0 2px}
+    /* Zoom slider */
+    .zoom-row{display:flex;align-items:center;gap:10px;margin-top:8px;}
+    .zoom-row input[type=range]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:rgba(255,255,255,0.1);outline:none;}
+    .zoom-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--surface);}
+    .zoom-num{font-family:var(--mono);font-size:13px;min-width:22px;}
 
-  /* ── LIGHTBOX ── */
-  #lb{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.93);
-    display:none;align-items:center;justify-content:center;
-    flex-direction:column;gap:.9rem;padding:1rem;cursor:zoom-out}
-  #lb.open{display:flex}
-  #lb img{max-width:min(90vw,900px);max-height:78vh;border-radius:10px;
-    object-fit:contain;box-shadow:0 0 60px rgba(0,0,0,.5);cursor:default}
-  #lb-cap{color:rgba(255,255,255,.85);font-size:.86rem;font-family:'Playfair Display',serif;
-    text-align:center;max-width:600px;line-height:1.5}
-  #lb-close{position:absolute;top:1rem;right:1.2rem;color:rgba(255,255,255,.65);
-    font-size:1.8rem;cursor:pointer;background:none;border:none;line-height:1;transition:color .15s}
-  #lb-close:hover{color:#fff}
-  #lb-prev,#lb-next{position:absolute;top:50%;transform:translateY(-50%);
-    background:rgba(255,255,255,.12);border:none;color:#fff;font-size:1.5rem;
-    width:42px;height:42px;border-radius:50%;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;transition:background .15s}
-  #lb-prev:hover,#lb-next:hover{background:rgba(255,255,255,.25)}
-  #lb-prev{left:1rem}#lb-next{right:1rem}
-  #lb-ctr{position:absolute;bottom:.9rem;color:rgba(255,255,255,.4);font-size:.72rem}
+    /* Label input */
+    .label-input{
+      width:100%;background:var(--surface2);border:1px solid var(--border);
+      border-radius:8px;padding:9px 12px;font-family:var(--mono);font-size:13px;
+      color:var(--text);outline:none;transition:border-color 0.15s;margin-top:4px;
+    }
+    .label-input:focus{border-color:var(--accent);}
+    .label-input::placeholder{color:var(--muted);}
 
-  /* ── INFO PAGE ── */
-  .info-wrap{max-width:900px;margin:0 auto;padding:0 1.2rem 3rem}
-  .info-sec{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:600;
-    color:var(--bd);padding:1.8rem 0 .65rem;border-bottom:2px solid var(--gold);
-    margin-bottom:.9rem;display:flex;align-items:center;gap:.4rem}
-  .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-  @media(max-width:580px){.about-grid{grid-template-columns:1fr}}
-  .about-img{width:100%;height:180px;object-fit:cover;border-radius:11px;display:block}
-  .about-text{display:flex;flex-direction:column;justify-content:center;gap:.55rem}
-  .about-badge{display:inline-block;background:var(--cream);color:var(--bl);font-size:.65rem;
-    font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:3px 9px;
-    border-radius:20px;align-self:flex-start}
-  .about-text h3{font-family:'Playfair Display',serif;font-size:1rem;font-weight:600;color:var(--bd)}
-  .about-text p{font-size:.8rem;color:var(--muted);line-height:1.7}
-  .cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:.8rem}
-  .cc{background:#fff;border:1px solid var(--bdr);border-radius:11px;
-    padding:.9rem 1rem;display:flex;align-items:flex-start;gap:.65rem}
-  .ci{font-size:1.3rem;flex-shrink:0;margin-top:1px}
-  .cl{font-size:.63rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-    color:var(--muted);margin-bottom:.18rem}
-  .cv{font-size:.85rem;font-weight:600;color:var(--bd)}
-  .hg{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:.75rem}
-  .hc{background:#fff;border:1px solid var(--bdr);border-radius:11px;padding:.8rem;text-align:center}
-  .hd{font-size:.64rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-    color:var(--muted);margin-bottom:.22rem}
-  .ht{font-family:'Playfair Display',serif;font-size:.92rem;font-weight:600;color:var(--bd)}
-  .promo{background:var(--bm);border-radius:13px;overflow:hidden;
-    display:flex;align-items:stretch;min-height:105px}
-  .promo-photo{width:120px;flex-shrink:0;object-fit:cover;display:block}
-  .promo-body{padding:.9rem 1.1rem;display:flex;flex-direction:column;justify-content:center;gap:.3rem}
-  .promo-tag{font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
-  .promo-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--cream);line-height:1.3}
-  .promo-desc{font-size:.72rem;color:rgba(245,236,215,.7);line-height:1.4}
-  .promo-price{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--gold)}
-  .feat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:.85rem}
-  .feat-card{background:#fff;border:1px solid var(--bdr);border-radius:11px;overflow:hidden;cursor:pointer}
-  .feat-img{width:100%;height:105px;object-fit:cover;display:block;transition:transform .2s}
-  .feat-card:hover .feat-img{transform:scale(1.04)}
-  .feat-body{padding:.55rem .75rem}
-  .feat-name{font-family:'Playfair Display',serif;font-size:.85rem;font-weight:600;
-    color:var(--bd);margin-bottom:.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .feat-price{font-size:.8rem;font-weight:700;color:var(--bl)}
-  .info-gal{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}
-  @media(max-width:460px){.info-gal{grid-template-columns:repeat(2,1fr)}}
-  .info-gal-img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:9px;
-    display:block;cursor:pointer;transition:transform .2s}
-  .info-gal-img:hover{transform:scale(1.03)}
-  .map-card{background:#fff;border:1px solid var(--bdr);border-radius:13px;overflow:hidden}
-  .map-frame{width:100%;height:220px;border:none;display:block}
-  .map-info{padding:.8rem 1rem;display:flex;flex-wrap:wrap;gap:.7rem;
-    align-items:center;justify-content:space-between}
-  .map-addr{font-size:.79rem;color:var(--muted);line-height:1.6}
-  .map-addr strong{display:block;font-size:.88rem;color:var(--bd);font-weight:700;margin-bottom:.1rem}
-  .map-lnk{display:inline-block;padding:5px 13px;border-radius:20px;background:var(--bd);
-    color:var(--cream);font-size:.71rem;font-weight:700;text-decoration:none;
-    letter-spacing:.04em;transition:background .2s;white-space:nowrap}
-  .map-lnk:hover{background:var(--gold);color:var(--bd)}
-  footer{background:var(--bd);color:var(--gold);text-align:center;
-    padding:1.6rem 1rem;font-size:.78rem;letter-spacing:.05em}
-  footer p+p{margin-top:.28rem;color:rgba(201,168,124,.45);font-size:.71rem}
+    /* Generate btn */
+    .btn-gen{
+      width:100%;padding:12px;font-family:var(--display);font-size:14px;font-weight:700;
+      color:#0a0b0d;background:var(--accent);border:none;border-radius:10px;
+      cursor:pointer;transition:opacity 0.15s,transform 0.1s;margin-top:4px;
+    }
+    .btn-gen:hover{opacity:0.9;}
+    .btn-gen:active{transform:scale(0.98);}
+    .btn-gen:disabled{opacity:0.35;cursor:not-allowed;}
 
-  /* ════════════════════════
-     ADMIN PAGE
-  ════════════════════════ */
-  #page-admin{background:#f0ede8;min-height:100vh;padding-bottom:2rem}
-  .adm-bar{background:#1a1a2e;padding:.6rem .9rem;display:flex;align-items:center;
-    gap:.5rem;flex-wrap:wrap;position:sticky;top:0;z-index:200}
-  .adm-bar-title{font-family:'Playfair Display',serif;font-size:.95rem;color:#fff;flex:1;white-space:nowrap}
-  .ab{padding:5px 13px;border-radius:7px;border:none;cursor:pointer;
-    font-family:'Lato',sans-serif;font-size:.71rem;font-weight:700;
-    letter-spacing:.04em;transition:all .16s;white-space:nowrap}
-  .ab-ghost{background:transparent;color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.2)}
-  .ab-ghost:hover{background:rgba(255,255,255,.1);color:#fff}
-  .ab-green{background:#16a34a;color:#fff}.ab-green:hover{filter:brightness(.9)}
-  .ab-gold{background:var(--gold);color:var(--bd)}.ab-gold:hover{filter:brightness(.92)}
-  .ab-blue{background:#2563eb;color:#fff}.ab-blue:hover{filter:brightness(.9)}
-  .ab-red{background:#dc2626;color:#fff}.ab-red:hover{filter:brightness(.9)}
-  .adm-body{max-width:960px;margin:0 auto;padding:1rem}
-  .adm-tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
-  .atab{padding:5px 13px;border-radius:20px;border:1.5px solid rgba(201,168,124,.4);
-    background:transparent;color:var(--muted);font-family:'Lato',sans-serif;
-    font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-    cursor:pointer;transition:all .14s}
-  .atab:hover,.atab.active{background:var(--gold);color:var(--bd);border-color:var(--gold)}
-  .acard{background:#fff;border-radius:11px;border:1px solid #e0ddd9;padding:.9rem;margin-bottom:.85rem}
-  .acard-head{font-family:'Playfair Display',serif;font-size:.98rem;font-weight:600;
-    color:var(--bd);margin-bottom:.75rem;padding-bottom:.4rem;
-    border-bottom:1.5px solid var(--gold);display:flex;align-items:center;justify-content:space-between}
-  .prow{display:flex;align-items:flex-start;gap:.7rem;padding:.6rem 0;
-    border-bottom:1px solid #f0ede8}
-  .prow:last-child{border-bottom:none}
-  .athumb{width:52px;height:52px;border-radius:8px;overflow:hidden;flex-shrink:0;
-    border:1px solid #e0ddd9;cursor:pointer;position:relative}
-  .athumb img{width:100%;height:100%;object-fit:cover;display:block}
-  .athumb-ov{position:absolute;inset:0;background:rgba(0,0,0,.4);
-    display:flex;align-items:center;justify-content:center;opacity:0;
-    transition:opacity .14s;font-size:.78rem;color:#fff}
-  .athumb:hover .athumb-ov{opacity:1}
-  .pfields{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:.3rem .45rem}
-  .pf-full{grid-column:1/-1}
-  .ainp{padding:5px 8px;border-radius:6px;border:1.5px solid #d8d5d0;
-    font-family:'Lato',sans-serif;font-size:.77rem;color:var(--text);
-    background:#faf9f7;width:100%;transition:border-color .14s}
-  .ainp:focus{outline:none;border-color:var(--gold)}
-  .albl{font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-    color:var(--muted);margin-bottom:2px;display:block}
-  .afw{display:flex;flex-direction:column}
-  .adel{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:6px;
-    width:26px;height:26px;display:flex;align-items:center;justify-content:center;
-    cursor:pointer;font-size:.8rem;flex-shrink:0;margin-top:14px;transition:all .14s}
-  .adel:hover{background:#dc2626;color:#fff}
-  .ggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.55rem}
-  .gcell{border-radius:8px;overflow:hidden;position:relative;aspect-ratio:4/3;
-    background:#f0ede8;border:1.5px solid #e0ddd9}
-  .gcell img{width:100%;height:100%;object-fit:cover;display:block}
-  .gcell-ov{position:absolute;inset:0;background:rgba(0,0,0,.5);opacity:0;
-    transition:opacity .14s;display:flex;align-items:center;justify-content:center;gap:.3rem}
-  .gcell:hover .gcell-ov{opacity:1}
-  .gov{background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:5px;
-    padding:3px 6px;cursor:pointer;font-size:.66rem;transition:background .14s}
-  .gov:hover{background:rgba(255,255,255,.35)}
-  .capinp{width:100%;padding:4px 6px;border-radius:5px;border:1.5px solid #d8d5d0;
-    font-family:'Lato',sans-serif;font-size:.69rem;color:var(--text);
-    background:#faf9f7;margin-top:.25rem;transition:border-color .14s}
-  .capinp:focus{outline:none;border-color:var(--gold)}
-  .gtinp{width:100%;padding:5px 8px;border-radius:6px;border:1.5px solid #d8d5d0;
-    font-family:'Lato',sans-serif;font-size:.79rem;color:var(--text);
-    background:#faf9f7;margin-bottom:.6rem;transition:border-color .14s}
-  .gtinp:focus{outline:none;border-color:var(--gold)}
-  #toast{position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%) translateY(14px);
-    background:#1a1a2e;color:#fff;padding:8px 18px;border-radius:30px;font-size:.77rem;
-    font-weight:500;opacity:0;transition:all .25s;pointer-events:none;z-index:9999;white-space:nowrap}
-  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-  #toast.ok{background:#16a34a}
-  #toast.warn{background:#d97706}
+    /* Code output */
+    .code-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .copy-btn{
+      display:flex;align-items:center;gap:5px;padding:4px 10px;font-size:11px;font-weight:600;
+      font-family:var(--display);color:var(--accent);background:var(--accent-dim);
+      border:1px solid rgba(74,222,128,0.2);border-radius:6px;cursor:pointer;
+    }
+    .copy-btn:hover{background:rgba(74,222,128,0.2);}
+    .code-box{
+      background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+      padding:12px;font-family:var(--mono);font-size:11px;line-height:1.7;
+      color:#a0acb8;word-break:break-all;white-space:pre-wrap;
+      max-height:180px;overflow-y:auto;
+    }
+
+    /* Tip pill */
+    .tip{
+      font-size:11px;color:var(--muted);font-family:var(--mono);
+      background:var(--surface2);border-radius:6px;padding:8px 10px;
+      line-height:1.6;margin-bottom:8px;
+    }
+    .tip strong{color:var(--text);}
+
+    /* Status */
+    .status-msg{font-size:12px;font-family:var(--mono);color:var(--muted);margin-top:6px;min-height:16px;}
+    .status-msg.ok{color:var(--accent);}
+    .status-msg.err{color:#f87171;}
+
+    /* Empty state */
+    .empty{text-align:center;padding:24px 16px;}
+    .empty-icon{font-size:32px;margin-bottom:8px;}
+    .empty p{font-size:13px;color:var(--muted);line-height:1.6;}
+
+    /* Responsive */
+    @media(max-width:640px){
+      .main{flex-direction:column;}
+      .sidebar{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--border);}
+      #map{min-height:280px;}
+      .topbar{flex-direction:column;align-items:stretch;}
+      .search-wrap{max-width:100%;}
+    }
   </style>
 </head>
 <body>
 
-<!-- LIGHTBOX -->
-<div id="lb" onclick="lbBg(event)">
-  <button id="lb-close" onclick="lbClose()">✕</button>
-  <button id="lb-prev" onclick="lbNav(-1);event.stopPropagation()">&#8249;</button>
-  <img id="lb-img" src="" alt=""/>
-  <div id="lb-cap"></div>
-  <button id="lb-next" onclick="lbNav(1);event.stopPropagation()">&#8250;</button>
-  <span id="lb-ctr"></span>
+<!-- Top bar -->
+<div class="topbar">
+  <div class="topbar-title">📍 Maps <span>Picker</span></div>
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Buscar lugar o dirección..." />
+    <button class="btn-search" id="btnSearch">Buscar</button>
+  </div>
+  <button class="btn-gps" id="btnGps">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg>
+    Mi ubicación
+  </button>
 </div>
 
-<!-- ADMIN FLOATING BUTTON -->
-<button id="adminBtn" onclick="goAdmin()">⚙ Administrar</button>
+<div class="main">
+  <!-- Map -->
+  <div id="map"></div>
 
-<!-- ══════════ MENU PAGE ══════════ -->
-<div class="page active" id="page-menu">
-  <a class="banner" href="#" onclick="goPage('info');return false">
-    <img class="banner-photo" src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&q=80" alt="Café Roble"/>
-    <div class="banner-body">
-      <span class="banner-name">Café Roble</span>
-      <span class="banner-sub">Av. Principal 123 · Desde 1998</span>
-    </div>
-    <div class="banner-action">
-      <span class="banner-action-icon">ℹ️</span>
-      <span class="banner-action-label">Nosotros</span>
-    </div>
-  </a>
-  <nav class="cat-nav-wrap"><div class="cat-nav" id="catNav"></div></nav>
-  <p class="swipe-hint" id="swipeHint">← arrastra para cambiar categoría →</p>
-  <div class="slider-vp" id="viewport"><div class="slider-track" id="track"></div></div>
-  <footer><p>Café Roble · Lunes a domingo, 7:00 – 21:00</p><p>Av. Principal 123 · Tel. (555) 000-0000</p></footer>
-</div>
+  <!-- Sidebar -->
+  <div class="sidebar">
 
-<!-- ══════════ INFO PAGE ══════════ -->
-<div class="page" id="page-info">
-  <a class="banner" href="#" onclick="goPage('menu');return false">
-    <img class="banner-photo" src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&q=80" alt="Café Roble"/>
-    <div class="banner-body">
-      <span class="banner-name">Café Roble</span>
-      <span class="banner-sub">Av. Principal 123 · Desde 1998</span>
+    <div class="sidebar-section">
+      <div class="tip">
+        <strong>3 formas de ubicar:</strong><br>
+        🖱 Clic en el mapa<br>
+        🔍 Busca una dirección arriba<br>
+        📍 Arrastra el marcador
+      </div>
+      <div class="section-label">Coordenadas seleccionadas</div>
+      <div class="coord-row"><span class="coord-key">Latitud</span><span class="coord-val" id="dispLat">—</span></div>
+      <div class="coord-row"><span class="coord-key">Longitud</span><span class="coord-val" id="dispLng">—</span></div>
+      <div class="coord-row"><span class="coord-key">Dirección</span><span class="coord-val" id="dispAddr" style="font-size:11px;max-width:160px;text-align:right;color:var(--muted)">—</span></div>
     </div>
-    <div class="banner-action">
-      <span class="banner-action-icon">📋</span>
-      <span class="banner-action-label">Carta</span>
+
+    <div class="sidebar-section">
+      <div class="section-label">Opciones del embed</div>
+      <label style="font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);">Zoom del mapa</label>
+      <div class="zoom-row">
+        <span style="font-size:10px;color:var(--muted)">5</span>
+        <input type="range" min="5" max="20" value="15" id="zoomSlider"/>
+        <span style="font-size:10px;color:var(--muted)">20</span>
+        <span class="zoom-num" id="zoomNum">15</span>
+      </div>
+      <label style="font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);display:block;margin-top:12px;margin-bottom:4px;">Etiqueta del marcador</label>
+      <input type="text" class="label-input" id="labelInput" placeholder="Ej: Mi restaurante, Oficina..."/>
     </div>
-  </a>
-  <div class="info-wrap">
-    <h2 class="info-sec">⭐ Oferta del mes</h2>
-    <div class="promo">
-      <img class="promo-photo" src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&q=80" alt="Promo"/>
-      <div class="promo-body">
-        <span class="promo-tag">Solo en noviembre</span>
-        <p class="promo-title">Desayuno completo + café</p>
-        <p class="promo-desc">Elige tu desayuno favorito y llévate un espresso o americano incluido.</p>
-        <span class="promo-price">$10.90</span>
+
+    <div class="sidebar-section">
+      <button class="btn-gen" id="btnGen" disabled>Generar embed →</button>
+      <div class="status-msg" id="statusMsg">Selecciona un punto en el mapa primero</div>
+    </div>
+
+    <div class="sidebar-section" id="outputSection" style="display:none">
+      <div class="code-header">
+        <span class="section-label" style="margin:0">Código iframe</span>
+        <button class="copy-btn" id="copyBtn">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copiar
+        </button>
+      </div>
+      <div class="code-box" id="codeBox"></div>
+    </div>
+
+    <div class="sidebar-section" id="previewSection" style="display:none">
+      <div class="section-label">Vista previa</div>
+      <div style="border-radius:10px;overflow:hidden;border:1px solid var(--border);">
+        <iframe id="previewFrame" width="100%" height="200" frameborder="0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div>
     </div>
-    <h2 class="info-sec">🫘 Nuestra historia</h2>
-    <div class="about-grid">
-      <img class="about-img" src="https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=600&q=80" alt="Interior"/>
-      <div class="about-text">
-        <span class="about-badge">Desde 1998</span>
-        <h3>Un rincón para los amantes del café</h3>
-        <p>Café Roble nació con la idea de crear un espacio cálido donde cada taza cuente una historia. Granos de origen único, tostados artesanalmente cada semana.</p>
-        <p>Más de 25 años perfeccionando recetas y construyendo una comunidad de apasionados del buen café.</p>
-      </div>
-    </div>
-    <h2 class="info-sec">📞 Contacto</h2>
-    <div class="cg">
-      <div class="cc"><span class="ci">📍</span><div><p class="cl">Dirección</p><p class="cv">Av. Principal 123, Col. Centro</p></div></div>
-      <div class="cc"><span class="ci">📱</span><div><p class="cl">Teléfono</p><p class="cv">(555) 000-0000</p></div></div>
-      <div class="cc"><span class="ci">✉️</span><div><p class="cl">Email</p><p class="cv">info@caferoble.com</p></div></div>
-      <div class="cc"><span class="ci">📸</span><div><p class="cl">Instagram</p><p class="cv">@caferoble</p></div></div>
-    </div>
-    <h2 class="info-sec">🕐 Horarios</h2>
-    <div class="hg">
-      <div class="hc"><p class="hd">Lun – Vie</p><p class="ht">7:00 – 21:00</p></div>
-      <div class="hc"><p class="hd">Sábado</p><p class="ht">8:00 – 22:00</p></div>
-      <div class="hc"><p class="hd">Domingo</p><p class="ht">9:00 – 19:00</p></div>
-      <div class="hc"><p class="hd">Festivos</p><p class="ht">9:00 – 18:00</p></div>
-    </div>
-    <h2 class="info-sec">✨ Destacados</h2>
-    <div class="feat-grid" id="infoFeat"></div>
-    <h2 class="info-sec">📸 Galería</h2>
-    <div class="info-gal" id="infoGal"></div>
-    <h2 class="info-sec">📍 Ubicación</h2>
-    <div class="map-card">
-      <iframe class="map-frame" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.521260322283!2d-99.16869232426222!3d19.427023340975!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDI1JzM3LjMiTiA5OcKwMTAnMDAuMyJX!5e0!3m2!1ses!2smx!4v1699000000000!5m2!1ses!2smx" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-      <div class="map-info">
-        <div class="map-addr"><strong>Café Roble</strong>Av. Principal 123, Col. Centro<br>Tel: (555) 000-0000</div>
-        <a class="map-lnk" href="https://maps.google.com" target="_blank">Abrir en Maps →</a>
-      </div>
-    </div>
-  </div>
-  <footer><p>Café Roble · Lunes a domingo, 7:00 – 21:00</p><p>Av. Principal 123 · Tel. (555) 000-0000</p></footer>
-</div>
 
-<!-- ══════════ ADMIN PAGE ══════════ -->
-<div class="page" id="page-admin">
-  <div class="adm-bar">
-    <span class="adm-bar-title">⚙️ Administración — Café Roble</span>
-    <button class="ab ab-ghost" onclick="goPage('menu')">← Salir</button>
-    <button class="ab ab-green" onclick="admApply()">✔ Guardar y aplicar</button>
-    <button class="ab ab-gold" onclick="admExport()">⬇ Exportar JSON</button>
-    <label class="ab ab-blue" style="cursor:pointer">
-      📂 Importar JSON
-      <input type="file" accept=".json" style="display:none" onchange="admImport(this)"/>
-    </label>
-  </div>
-  <div class="adm-body">
-    <div class="adm-tabs" id="admTabs"></div>
-    <div id="admContent"></div>
   </div>
 </div>
-
-<div id="toast"></div>
 
 <script>
-/* ═══════════════════════
-   DATOS EMBEBIDOS
-   (se sobreescriben con localStorage si el admin guardó cambios)
-═══════════════════════ */
-const DEFAULT_DATA = {
-  categorias:[
-    {
-      id:"cafes", label:"Cafés",
-      productos:[
-        {nombre:"Espresso",    desc:"Shot puro de café de origen único, tostado artesanal. Intenso y cremoso con crema dorada perfecta.",       precio:"$1.80", badge:"Clásico",      img:"https://images.unsplash.com/photo-1541167760496-1628856ab772?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1541167760496-1628856ab772?w=900&q=90"},
-        {nombre:"Cappuccino",  desc:"Espresso con leche vaporizada y espuma cremosa. Equilibrio perfecto entre intensidad y suavidad.",         precio:"$3.20", badge:"",             img:"https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=900&q=90"},
-        {nombre:"Latte",       desc:"Café suave con abundante leche vaporizada. Disponible en vainilla, caramelo y avellana.",                  precio:"$3.50", badge:"Popular",      img:"https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=900&q=90"},
-        {nombre:"Mocha",       desc:"Espresso con chocolate belga y leche cremosa vaporizada. Un lujo para el paladar.",                        precio:"$4.00", badge:"",             img:"https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=900&q=90"},
-        {nombre:"Cortado",     desc:"Espresso cortado con un toque de leche caliente. Intensidad suavizada sin perder carácter.",               precio:"$2.40", badge:"",             img:"https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=90"},
-        {nombre:"Americano",   desc:"Espresso con agua caliente. Largo, suave y reconfortante, ideal para saborear despacio.",                  precio:"$2.80", badge:"",             img:"https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=900&q=90"}
-      ],
-      galeria:{titulo:"Momentos con un café", fotos:[
-        {img:"https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=900&q=90", caption:"Nuestro rincón favorito para tomar un café tranquilo"},
-        {img:"https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=900&q=90", caption:"Cada taza es una obra de arte hecha con pasión"},
-        {img:"https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=900&q=90", caption:"El aroma del café recién hecho te espera cada mañana"}
-      ]}
-    },
-    {
-      id:"frios", label:"Fríos",
-      productos:[
-        {nombre:"Cold Brew",           desc:"Café macerado en frío durante 24 horas. Suave, sin acidez y muy refrescante.",                    precio:"$4.20", badge:"Verano", img:"https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=900&q=90"},
-        {nombre:"Frappé de vainilla",  desc:"Café mezclado con hielo, leche y jarabe de vainilla. Cremoso, dulce e irresistible.",             precio:"$4.80", badge:"",       img:"https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=900&q=90"},
-        {nombre:"Matcha Latte frío",   desc:"Té matcha japonés ceremonial con leche de avena y hielo. Energizante y delicado.",                precio:"$4.50", badge:"",       img:"https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=900&q=90"},
-        {nombre:"Limonada de jengibre",desc:"Limonada natural con jengibre fresco, menta y un toque de miel artesanal.",                      precio:"$3.80", badge:"",       img:"https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=900&q=90"}
-      ],
-      galeria:{titulo:"Refrescante en cada sorbo", fotos:[
-        {img:"https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=90", caption:"La frescura del cold brew en una tarde de verano"},
-        {img:"https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&q=80",    imgFull:"https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=900&q=90",    caption:"Matcha ceremonial — energía natural desde Japón"},
-        {img:"https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=900&q=90", caption:"Sabores frescos y naturales para los días más calurosos"}
-      ]}
-    },
-    {
-      id:"panaderia", label:"Panadería",
-      productos:[
-        {nombre:"Croissant de mantequilla",desc:"Hojaldre artesanal, crujiente por fuera y esponjoso por dentro. Horneado cada mañana.",      precio:"$2.50", badge:"Recién hecho", img:"https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1509440159596-0249088772ff?w=900&q=90"},
-        {nombre:"Bagel con queso crema",   desc:"Bagel tostado con queso crema y láminas de salmón ahumado. Clásico neoyorquino.",            precio:"$5.90", badge:"",             img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=900&q=90"},
-        {nombre:"Tostada con aguacate",    desc:"Pan de masa madre, aguacate machacado, tomate cherry, semillas y sal en escamas.",            precio:"$6.50", badge:"",             img:"https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=900&q=90"},
-        {nombre:"Waffle belga",            desc:"Waffle crujiente con frutos rojos frescos, crema batida y sirope de arce.",                  precio:"$5.20", badge:"",             img:"https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=900&q=90"}
-      ],
-      galeria:{titulo:"Horneado con amor cada mañana", fotos:[
-        {img:"https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1509440159596-0249088772ff?w=900&q=90", caption:"Croissants recién salidos del horno, crujientes y dorados"},
-        {img:"https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=400&q=80",    imgFull:"https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=900&q=90",    caption:"Waffles belgas con frutas del bosque y crema fresca"},
-        {img:"https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1603046891744-1f8531c89fe8?w=900&q=90", caption:"Pan de masa madre con aguacate — sencillo y delicioso"}
-      ]}
-    },
-    {
-      id:"desayunos", label:"Desayunos",
-      productos:[
-        {nombre:"Huevos benedictinos",  desc:"Huevos pochados sobre jamón y pan inglés tostado con salsa holandesa casera.",                    precio:"$9.50", badge:"Estrella", img:"https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=900&q=90"},
-        {nombre:"Bowl de granola",      desc:"Granola artesanal tostada, yogur griego, miel de abeja y frutas de temporada.",                  precio:"$7.20", badge:"",         img:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&q=90"},
-        {nombre:"Pancakes de arándanos",desc:"Esponjosos pancakes con arándanos frescos, mantequilla y sirope de maple puro.",                 precio:"$8.00", badge:"",         img:"https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=900&q=90"},
-        {nombre:"Revuelto de la casa",  desc:"Huevos revueltos con queso feta, espinacas frescas y tomatitos cherry asados.",                  precio:"$7.80", badge:"",         img:"https://images.unsplash.com/photo-1506619216599-9d16d0903dfd?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1506619216599-9d16d0903dfd?w=900&q=90"}
-      ],
-      galeria:{titulo:"Empieza el día con buen pie", fotos:[
-        {img:"https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=900&q=90", caption:"Huevos benedictinos — el desayuno que lo cambia todo"},
-        {img:"https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=900&q=90", caption:"Pancakes esponjosos bañados en sirope de maple puro"},
-        {img:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&q=90", caption:"Bowl de granola artesanal con frutas frescas de temporada"}
-      ]}
-    },
-    {
-      id:"postres", label:"Postres",
-      productos:[
-        {nombre:"Tarta de queso",   desc:"Cheesecake cremoso al horno con base de galleta y coulis de frutos rojos.",                           precio:"$5.50", badge:"Favorito", img:"https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=900&q=90"},
-        {nombre:"Brownie con helado",desc:"Brownie de chocolate intenso, tibio, con bola de helado de vainilla artesanal.",                     precio:"$5.80", badge:"",         img:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=900&q=90"},
-        {nombre:"Tiramisú",         desc:"Receta italiana tradicional con bizcochos empapados, mascarpone y cacao en polvo.",                   precio:"$6.20", badge:"",         img:"https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=900&q=90"},
-        {nombre:"Flan de la abuela",desc:"Flan casero de huevo con caramelo tostado y nata montada. Receta de siempre.",                       precio:"$4.80", badge:"",         img:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&q=80", imgFull:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=90"}
-      ],
-      galeria:{titulo:"El dulce final que mereces", fotos:[
-        {img:"https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=900&q=90", caption:"Tarta de queso horneada — cremosa, perfecta, irresistible"},
-        {img:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=900&q=90", caption:"Brownie tibio con helado — contraste de texturas y sabores"},
-        {img:"https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&q=80", imgFull:"https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=900&q=90", caption:"Tiramisú artesanal — la elegancia del postre italiano clásico"}
-      ]}
-    }
-  ]
-};
+  // Init map
+  const map = L.map('map', {zoomControl:true}).setView([19.4270, -99.1687], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution:'© OpenStreetMap',maxZoom:20
+  }).addTo(map);
 
-/* ═══════════════════════
-   LOAD DATA
-═══════════════════════ */
-let DATA;
-try {
-  const saved = localStorage.getItem('cafeRoble_v2');
-  DATA = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_DATA));
-} catch(e) {
-  DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
-}
-
-/* ═══════════════════════
-   RENDER MENU
-═══════════════════════ */
-function renderMenu() {
-  // Nav buttons
-  const nav = document.getElementById('catNav');
-  nav.innerHTML = '';
-  DATA.categorias.forEach((cat, i) => {
-    const b = document.createElement('button');
-    b.className = 'cat-btn' + (i===0?' active':'');
-    b.dataset.index = i;
-    b.textContent = cat.label;
-    b.addEventListener('click', () => goTo(i, true));
-    nav.appendChild(b);
+  // Custom marker icon
+  const markerIcon = L.divIcon({
+    className:'',
+    html:`<div style="width:28px;height:28px;background:#4ade80;border:3px solid #0e0f11;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,0.5)"></div>`,
+    iconSize:[28,28],iconAnchor:[14,28],
   });
 
-  // Panels
-  const track = document.getElementById('track');
-  track.innerHTML = '';
-  sliderReady = false;
+  let marker = null;
+  let selLat = null, selLng = null;
 
-  DATA.categorias.forEach((cat, ci) => {
-    const panel = document.createElement('div');
-    panel.className = 'slide-panel';
+  const dispLat    = document.getElementById('dispLat');
+  const dispLng    = document.getElementById('dispLng');
+  const dispAddr   = document.getElementById('dispAddr');
+  const zoomSlider = document.getElementById('zoomSlider');
+  const zoomNum    = document.getElementById('zoomNum');
+  const labelInput = document.getElementById('labelInput');
+  const btnGen     = document.getElementById('btnGen');
+  const statusMsg  = document.getElementById('statusMsg');
+  const outputSection = document.getElementById('outputSection');
+  const previewSection = document.getElementById('previewSection');
+  const codeBox    = document.getElementById('codeBox');
+  const previewFrame = document.getElementById('previewFrame');
+  const copyBtn    = document.getElementById('copyBtn');
+  const searchInput = document.getElementById('searchInput');
+  const btnSearch  = document.getElementById('btnSearch');
+  const btnGps     = document.getElementById('btnGps');
 
-    // rows
-    const rows = cat.productos.map((p, pi) => {
-      const row = document.createElement('div');
-      row.className = 'item-row';
-      row.innerHTML = `
-        <div class="item-thumb">
-          <img src="${e(p.img)}" alt="${e(p.nombre)}" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'">
-          ${p.badge ? `<span class="badge">${e(p.badge)}</span>` : ''}
-        </div>
-        <div class="item-info">
-          <p class="item-name">${e(p.nombre)}</p>
-          <p class="item-desc">${e(p.desc)}</p>
-        </div>
-        <div class="item-right"><span class="price">${e(p.precio)}</span></div>`;
-      row.querySelector('.item-thumb').addEventListener('click', () => lbProduct(ci, pi));
-      return row;
-    });
+  zoomSlider.addEventListener('input', () => { zoomNum.textContent = zoomSlider.value; });
 
-    const title = document.createElement('h2');
-    title.className = 'sec-title';
-    title.textContent = cat.label;
-    panel.appendChild(title);
+  function setPoint(lat, lng, addr) {
+    selLat = lat; selLng = lng;
+    dispLat.textContent = lat.toFixed(6);
+    dispLng.textContent = lng.toFixed(6);
+    dispAddr.textContent = addr || '—';
+    btnGen.disabled = false;
+    statusMsg.className = 'status-msg ok';
+    statusMsg.textContent = '✓ Punto seleccionado';
 
-    const list = document.createElement('div');
-    list.className = 'items-list';
-    rows.forEach(r => list.appendChild(r));
-    panel.appendChild(list);
-
-    // gallery
-    if (cat.galeria && cat.galeria.fotos && cat.galeria.fotos.length) {
-      const gal = document.createElement('div');
-      gal.className = 'panel-gal';
-      gal.innerHTML = `<p class="panel-gal-title">${e(cat.galeria.titulo||'')}</p>
-        <div class="panel-gal-grid">${cat.galeria.fotos.map((f,fi) => `
-          <div class="pgc" data-ci="${ci}" data-fi="${fi}">
-            <div class="pgc-img"><img src="${e(f.img)}" alt="" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'"></div>
-            <span class="pgc-cap">${e(f.caption||'')}</span>
-          </div>`).join('')}
-        </div>`;
-      gal.querySelectorAll('.pgc').forEach(c => {
-        c.addEventListener('click', () => lbGal(+c.dataset.ci, +c.dataset.fi));
+    if (marker) {
+      marker.setLatLng([lat, lng]);
+    } else {
+      marker = L.marker([lat, lng], {icon: markerIcon, draggable: true}).addTo(map);
+      marker.on('dragend', e => {
+        const p = e.target.getLatLng();
+        reverseGeocode(p.lat, p.lng);
       });
-      panel.appendChild(gal);
     }
+  }
 
-    track.appendChild(panel);
+  // Click on map
+  map.on('click', e => {
+    reverseGeocode(e.latlng.lat, e.latlng.lng);
   });
 
-  // reset slider to first category
-  currentCat = 0;
-  initSlider();
-}
+  // Reverse geocode with Nominatim
+  function reverseGeocode(lat, lng) {
+    dispAddr.textContent = '...';
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
+      .then(r => r.json())
+      .then(d => {
+        const addr = d.display_name ? d.display_name.split(',').slice(0,3).join(', ') : '';
+        setPoint(lat, lng, addr);
+        map.panTo([lat, lng]);
+      })
+      .catch(() => setPoint(lat, lng, ''));
+  }
 
-/* ═══════════════════════
-   INFO PAGE HIGHLIGHTS
-═══════════════════════ */
-function renderInfo() {
-  const feat = document.getElementById('infoFeat');
-  const gal  = document.getElementById('infoGal');
-  feat.innerHTML = ''; gal.innerHTML = '';
+  // Search
+  function doSearch() {
+    const q = searchInput.value.trim();
+    if (!q) return;
+    statusMsg.className = 'status-msg';
+    statusMsg.textContent = 'Buscando...';
+    fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`)
+      .then(r => r.json())
+      .then(data => {
+        if (!data.length) { statusMsg.textContent = 'No se encontró ese lugar.'; return; }
+        const r = data[0];
+        map.setView([r.lat, r.lon], 15);
+        reverseGeocode(parseFloat(r.lat), parseFloat(r.lon));
+      })
+      .catch(() => { statusMsg.textContent = 'Error al buscar.'; });
+  }
+  btnSearch.addEventListener('click', doSearch);
+  searchInput.addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
 
-  const galAll = [];
-  DATA.categorias.forEach(cat => {
-    if (cat.productos[0]) {
-      const p = cat.productos[0];
-      const card = document.createElement('div'); card.className = 'feat-card';
-      card.innerHTML = `<div style="overflow:hidden"><img class="feat-img" src="${e(p.img)}" alt="${e(p.nombre)}" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'"></div>
-        <div class="feat-body"><p class="feat-name">${e(p.nombre)}</p><p class="feat-price">${e(p.precio)}</p></div>`;
-      card.addEventListener('click', () => lbSingle(p.imgFull||p.img, p.nombre));
-      feat.appendChild(card);
+  // GPS
+  btnGps.addEventListener('click', () => {
+    if (!navigator.geolocation) { statusMsg.textContent = 'GPS no disponible.'; return; }
+    btnGps.disabled = true;
+    statusMsg.textContent = 'Obteniendo ubicación...';
+    navigator.geolocation.getCurrentPosition(pos => {
+      btnGps.disabled = false;
+      map.setView([pos.coords.latitude, pos.coords.longitude], 16);
+      reverseGeocode(pos.coords.latitude, pos.coords.longitude);
+    }, () => {
+      btnGps.disabled = false;
+      statusMsg.className = 'status-msg err';
+      statusMsg.textContent = 'Permiso de GPS denegado.';
+    }, {enableHighAccuracy:true, timeout:10000});
+  });
+
+  // Build embed
+  function buildUrl(lat, lng, zoom, label) {
+    const q = label ? encodeURIComponent(label)+'@'+lat+','+lng : lat+','+lng;
+    return `https://maps.google.com/maps?q=${q}&z=${zoom}&output=embed`;
+  }
+  function buildCode(lat, lng, zoom, label) {
+    return `<iframe\n  src="${buildUrl(lat,lng,zoom,label)}"\n  width="600"\n  height="450"\n  style="border:0;"\n  allowfullscreen=""\n  loading="lazy"\n  referrerpolicy="no-referrer-when-downgrade">\n</iframe>`;
+  }
+
+  btnGen.addEventListener('click', () => {
+    if (!selLat) return;
+    const zoom = zoomSlider.value;
+    const label = labelInput.value.trim();
+    const url = buildUrl(selLat.toFixed(6), selLng.toFixed(6), zoom, label);
+    codeBox.textContent = buildCode(selLat.toFixed(6), selLng.toFixed(6), zoom, label);
+    previewFrame.src = url;
+    outputSection.style.display = 'block';
+    previewSection.style.display = 'block';
+    outputSection.scrollIntoView({behavior:'smooth'});
+  });
+
+  // Copy
+  copyBtn.addEventListener('click', () => {
+    const text = codeBox.textContent;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        copyBtn.textContent = '✓ Copiado';
+        setTimeout(() => { copyBtn.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar`; }, 2000);
+      });
+    } else {
+      const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+      copyBtn.textContent='✓ Copiado';setTimeout(()=>{copyBtn.textContent='Copiar';},2000);
     }
-    if (cat.galeria?.fotos?.[0]) galAll.push(cat.galeria.fotos[0]);
   });
-
-  galAll.forEach((f,i) => {
-    const img = document.createElement('img'); img.className='info-gal-img';
-    img.src = f.imgFull||f.img; img.alt='';
-    img.addEventListener('click', () => lbGallery(galAll.map(g=>({src:g.imgFull||g.img,cap:g.caption||''})),i));
-    gal.appendChild(img);
-  });
-}
-
-/* ═══════════════════════
-   LIGHTBOX
-═══════════════════════ */
-let _lbImgs=[], _lbIdx=0;
-
-function lbProduct(ci,pi){
-  _lbImgs = DATA.categorias[ci].productos.map(p=>({src:p.imgFull||p.img||'',cap:p.nombre}));
-  _lbIdx=pi; lbShow();
-}
-function lbGal(ci,fi){
-  _lbImgs = (DATA.categorias[ci].galeria?.fotos||[]).map(f=>({src:f.imgFull||f.img||'',cap:f.caption||''}));
-  _lbIdx=fi; lbShow();
-}
-function lbSingle(src,cap){ _lbImgs=[{src,cap}]; _lbIdx=0; lbShow(); }
-function lbGallery(imgs,idx){ _lbImgs=imgs; _lbIdx=idx; lbShow(); }
-
-function lbShow(){
-  const cur=_lbImgs[_lbIdx]||{};
-  document.getElementById('lb-img').src=cur.src||'';
-  document.getElementById('lb-cap').textContent=cur.cap||'';
-  document.getElementById('lb-ctr').textContent=_lbImgs.length>1?(_lbIdx+1)+' / '+_lbImgs.length:'';
-  document.getElementById('lb-prev').style.display=_lbImgs.length>1?'':'none';
-  document.getElementById('lb-next').style.display=_lbImgs.length>1?'':'none';
-  document.getElementById('lb').classList.add('open');
-  document.body.style.overflow='hidden';
-}
-function lbClose(){ document.getElementById('lb').classList.remove('open'); document.body.style.overflow=''; }
-function lbBg(ev){ if(ev.target===document.getElementById('lb')) lbClose(); }
-function lbNav(d){ _lbIdx=(_lbIdx+d+_lbImgs.length)%_lbImgs.length; lbShow(); }
-document.addEventListener('keydown',ev=>{
-  if(!document.getElementById('lb').classList.contains('open')) return;
-  if(ev.key==='Escape') lbClose();
-  if(ev.key==='ArrowRight') lbNav(1);
-  if(ev.key==='ArrowLeft') lbNav(-1);
-});
-
-/* ═══════════════════════
-   PAGE NAVIGATION
-═══════════════════════ */
-function goPage(name){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-  window.scrollTo(0,0);
-  document.getElementById('adminBtn').style.display = name==='admin' ? 'none' : '';
-}
-function goAdmin(){ goPage('admin'); buildAdmin(); }
-
-/* ═══════════════════════
-   SLIDER
-═══════════════════════ */
-let currentCat=0, sliderReady=false, dragging=false, startX=0, dragDelta=0;
-
-function getPanels(){ return Array.from(document.querySelectorAll('.slide-panel')); }
-function getCatBtns(){ return Array.from(document.querySelectorAll('.cat-btn')); }
-
-function initSlider(){
-  if(sliderReady) return;
-  sliderReady=true;
-  const ps=getPanels();
-  ps.forEach(p=>{ p.style.position='absolute'; p.style.top='0'; p.style.left='0'; });
-  layout(0); syncH(false);
-}
-function layout(delta){
-  const vw=document.getElementById('viewport').offsetWidth;
-  getPanels().forEach((p,i)=>{ p.style.transform=`translateX(${(i-currentCat)*vw+delta}px)`; });
-}
-function syncH(anim){
-  const ps=getPanels(); if(!ps[currentCat]) return;
-  const t=document.getElementById('track');
-  t.style.transition=anim?'height .35s cubic-bezier(.25,.46,.45,.94)':'none';
-  t.style.height=ps[currentCat].scrollHeight+'px';
-}
-function goTo(idx,anim){
-  const ps=getPanels(), bs=getCatBtns(), TOTAL=ps.length;
-  idx=Math.max(0,Math.min(TOTAL-1,idx)); currentCat=idx;
-  ps.forEach(p=>{ p.style.transition=anim?'transform .35s cubic-bezier(.25,.46,.45,.94)':'none'; });
-  layout(0); syncH(anim);
-  bs.forEach((b,i)=>b.classList.toggle('active',i===idx));
-  const btn=bs[idx], nav=document.getElementById('catNav');
-  if(btn&&nav) nav.scrollTo({left:Math.max(0,(btn.offsetLeft-52)-(nav.offsetWidth/2-btn.offsetWidth/2)),behavior:'smooth'});
-  document.getElementById('swipeHint').classList.add('hidden');
-}
-
-const vp=document.getElementById('viewport');
-function gX(ev){ return ev.touches?ev.touches[0].clientX:ev.clientX; }
-function onS(ev){
-  if(ev.target.closest('.item-thumb,.pgc,.pgc-img')) return;
-  dragging=true; startX=gX(ev); dragDelta=0;
-  getPanels().forEach(p=>p.style.transition='none');
-  document.getElementById('track').style.transition='none';
-  vp.classList.add('grabbing');
-}
-function onM(ev){ if(!dragging) return; dragDelta=gX(ev)-startX; layout(dragDelta); }
-function onE(){
-  if(!dragging) return; dragging=false; vp.classList.remove('grabbing');
-  const thr=vp.offsetWidth*.2, TOTAL=getPanels().length;
-  if(dragDelta<-thr&&currentCat<TOTAL-1) goTo(currentCat+1,true);
-  else if(dragDelta>thr&&currentCat>0)   goTo(currentCat-1,true);
-  else                                    goTo(currentCat,true);
-}
-vp.addEventListener('mousedown',onS);
-window.addEventListener('mousemove',onM);
-window.addEventListener('mouseup',onE);
-vp.addEventListener('touchstart',onS,{passive:true});
-vp.addEventListener('touchmove',onM,{passive:true});
-vp.addEventListener('touchend',onE);
-window.addEventListener('resize',()=>{ if(sliderReady){layout(0);syncH(false);} });
-
-/* ═══════════════════════
-   ADMIN PANEL
-═══════════════════════ */
-let admTab=0;
-
-function buildAdmin(){
-  const tabs=document.getElementById('admTabs');
-  tabs.innerHTML='';
-  DATA.categorias.forEach((cat,i)=>{
-    const b=document.createElement('button');
-    b.className='atab'+(i===admTab?' active':'');
-    b.textContent=cat.label;
-    b.onclick=()=>{ admTab=i; buildAdmin(); };
-    tabs.appendChild(b);
-  });
-  renderAdmTab(admTab);
-}
-
-function renderAdmTab(ci){
-  const cat=DATA.categorias[ci];
-  const content=document.getElementById('admContent');
-  content.innerHTML='';
-
-  /* PRODUCTS */
-  const pc=document.createElement('div'); pc.className='acard';
-  const ph=document.createElement('div'); ph.className='acard-head';
-  ph.innerHTML=`<span>Productos — ${e(cat.label)}</span>`;
-  const addP=document.createElement('button'); addP.className='ab ab-blue'; addP.textContent='+ Producto';
-  addP.onclick=()=>{ cat.productos.push({nombre:'Nuevo producto',desc:'Descripción del producto.',precio:'$0.00',badge:'',img:'',imgFull:''}); renderAdmTab(ci); };
-  ph.appendChild(addP); pc.appendChild(ph);
-
-  cat.productos.forEach((p,pi)=>{
-    const row=document.createElement('div'); row.className='prow';
-
-    // thumb
-    const th=document.createElement('div'); th.className='athumb';
-    th.innerHTML=`<img src="${e(p.img||'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80')}" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'" alt=""><div class="athumb-ov">📷</div>`;
-    th.onclick=()=>admUploadProd(ci,pi,th.querySelector('img'));
-    row.appendChild(th);
-
-    // fields
-    const pf=document.createElement('div'); pf.className='pfields';
-    pf.innerHTML=`
-      <div class="afw"><label class="albl">Nombre</label><input class="ainp" value="${e(p.nombre)}" oninput="DATA.categorias[${ci}].productos[${pi}].nombre=this.value"></div>
-      <div class="afw"><label class="albl">Precio</label><input class="ainp" value="${e(p.precio)}" oninput="DATA.categorias[${ci}].productos[${pi}].precio=this.value"></div>
-      <div class="afw pf-full"><label class="albl">Descripción</label><input class="ainp" value="${e(p.desc)}" oninput="DATA.categorias[${ci}].productos[${pi}].desc=this.value"></div>
-      <div class="afw"><label class="albl">Badge (opcional)</label><input class="ainp" value="${e(p.badge||'')}" oninput="DATA.categorias[${ci}].productos[${pi}].badge=this.value"></div>
-      <div class="afw"><label class="albl">URL imagen</label><input class="ainp" value="${e(p.img||'')}" oninput="DATA.categorias[${ci}].productos[${pi}].img=this.value;DATA.categorias[${ci}].productos[${pi}].imgFull=this.value;this.closest('.prow').querySelector('img').src=this.value||'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'"></div>`;
-    row.appendChild(pf);
-
-    const del=document.createElement('div'); del.className='adel'; del.textContent='✕';
-    del.onclick=()=>{ if(confirm('¿Eliminar este producto?')){ cat.productos.splice(pi,1); renderAdmTab(ci); } };
-    row.appendChild(del);
-    pc.appendChild(row);
-  });
-  content.appendChild(pc);
-
-  /* GALLERY */
-  const gc=document.createElement('div'); gc.className='acard';
-  const gh=document.createElement('div'); gh.className='acard-head';
-  gh.innerHTML=`<span>Galería — ${e(cat.label)}</span>`;
-  const addG=document.createElement('button'); addG.className='ab ab-blue'; addG.textContent='+ Fotos';
-  addG.onclick=()=>admUploadGalMulti(ci);
-  gh.appendChild(addG); gc.appendChild(gh);
-
-  const gti=document.createElement('div');
-  gti.innerHTML=`<label class="albl" style="margin-bottom:3px;display:block">Título de la galería</label>
-    <input class="gtinp" value="${e(cat.galeria?.titulo||'')}" oninput="DATA.categorias[${ci}].galeria.titulo=this.value">`;
-  gc.appendChild(gti);
-
-  const gg=document.createElement('div'); gg.className='ggrid';
-  (cat.galeria?.fotos||[]).forEach((f,fi)=>{
-    const wrap=document.createElement('div');
-    const cell=document.createElement('div'); cell.className='gcell';
-    cell.innerHTML=`<img src="${e(f.img)}" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80'" alt="">
-      <div class="gcell-ov">
-        <button class="gov" onclick="admUploadGalAt(${ci},${fi},this.closest('.gcell').querySelector('img'))">📷</button>
-        <button class="gov" style="background:rgba(220,38,38,.5)" onclick="if(confirm('¿Eliminar foto?')){DATA.categorias[${ci}].galeria.fotos.splice(${fi},1);renderAdmTab(${ci})}">✕</button>
-      </div>`;
-    const cap=document.createElement('input'); cap.className='capinp';
-    cap.placeholder='Texto de la foto…'; cap.value=f.caption||'';
-    cap.oninput=()=>{ DATA.categorias[ci].galeria.fotos[fi].caption=cap.value; };
-    wrap.appendChild(cell); wrap.appendChild(cap);
-    gg.appendChild(wrap);
-  });
-  gc.appendChild(gg);
-  content.appendChild(gc);
-}
-
-/* upload helpers */
-function admUploadProd(ci,pi,imgEl){
-  pickFile(file=>{ toBase64(file, b64=>{ DATA.categorias[ci].productos[pi].img=b64; DATA.categorias[ci].productos[pi].imgFull=b64; imgEl.src=b64; toast('Imagen actualizada','ok'); }); });
-}
-function admUploadGalMulti(ci){
-  pickFiles(files=>{
-    if(!DATA.categorias[ci].galeria) DATA.categorias[ci].galeria={titulo:'',fotos:[]};
-    let done=0;
-    files.forEach(f=>{ toBase64(f, b64=>{ DATA.categorias[ci].galeria.fotos.push({img:b64,imgFull:b64,caption:''}); done++; if(done===files.length){ renderAdmTab(ci); toast(`${done} foto(s) agregada(s)`,'ok'); } }); });
-  });
-}
-function admUploadGalAt(ci,fi,imgEl){
-  pickFile(file=>{ toBase64(file, b64=>{ DATA.categorias[ci].galeria.fotos[fi].img=b64; DATA.categorias[ci].galeria.fotos[fi].imgFull=b64; imgEl.src=b64; toast('Foto actualizada','ok'); }); });
-}
-
-function pickFile(cb){ const i=document.createElement('input'); i.type='file'; i.accept='image/*'; i.onchange=ev=>cb(ev.target.files[0]); i.click(); }
-function pickFiles(cb){ const i=document.createElement('input'); i.type='file'; i.accept='image/*'; i.multiple=true; i.onchange=ev=>cb(Array.from(ev.target.files)); i.click(); }
-function toBase64(file,cb){ const r=new FileReader(); r.onload=ev=>cb(ev.target.result); r.readAsDataURL(file); }
-
-/* apply / export / import */
-function admApply(){
-  localStorage.setItem('cafeRoble_v2', JSON.stringify(DATA));
-  renderMenu(); renderInfo();
-  toast('✔ Cambios guardados y aplicados','ok');
-}
-function admExport(){
-  const blob=new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='menu-data.json'; a.click(); URL.revokeObjectURL(a.href);
-  toast('JSON exportado','ok');
-}
-function admImport(input){
-  const f=input.files[0]; if(!f) return;
-  const r=new FileReader(); r.onload=ev=>{
-    try{ DATA=JSON.parse(ev.target.result); localStorage.setItem('cafeRoble_v2',JSON.stringify(DATA)); admTab=0; buildAdmin(); toast('JSON importado','ok'); }
-    catch(_){ toast('Error: JSON inválido','warn'); }
-  }; r.readAsText(f); input.value='';
-}
-
-/* toast */
-function toast(msg,type=''){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.className=type; t.classList.add('show');
-  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2600);
-}
-
-/* escape */
-function e(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-
-/* ═══════════════════════
-   BOOT — runs once DOM ready
-═══════════════════════ */
-document.addEventListener('DOMContentLoaded', ()=>{
-  renderMenu();
-  renderInfo();
-});
 </script>
 </body>
 </html>
