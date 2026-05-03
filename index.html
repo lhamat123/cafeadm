@@ -14,135 +14,83 @@
       --border:rgba(255,255,255,0.08);--accent:#4ade80;
       --accent-dim:rgba(74,222,128,0.12);--text:#f0f0ee;--muted:#7a7d87;
       --mono:'DM Mono',monospace;--display:'Syne',sans-serif;
+      --red:#f87171;
     }
     html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--display);}
-    body{display:flex;flex-direction:column;min-height:100vh;padding:0;}
+    body{display:flex;flex-direction:column;min-height:100vh;}
 
-    /* Top bar */
-    .topbar{
-      display:flex;align-items:center;justify-content:space-between;
-      padding:14px 20px;
-      background:var(--surface);
-      border-bottom:1px solid var(--border);
-      gap:12px; flex-wrap:wrap;
-    }
-    .topbar-title{font-size:16px;font-weight:700;white-space:nowrap;}
+    /* Topbar */
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:var(--surface);border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap;}
+    .topbar-title{font-size:15px;font-weight:700;white-space:nowrap;}
     .topbar-title span{color:var(--accent);}
-
-    /* Search */
-    .search-wrap{display:flex;gap:8px;flex:1;max-width:420px;}
-    .search-wrap input{
-      flex:1;background:var(--surface2);border:1px solid var(--border);
-      border-radius:8px;padding:9px 13px;font-family:var(--mono);font-size:13px;
-      color:var(--text);outline:none;transition:border-color 0.15s;
-    }
+    .search-wrap{display:flex;gap:8px;flex:1;max-width:440px;}
+    .search-wrap input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:var(--mono);font-size:13px;color:var(--text);outline:none;transition:border-color .15s;}
     .search-wrap input:focus{border-color:var(--accent);}
     .search-wrap input::placeholder{color:var(--muted);}
-    .btn-search{
-      padding:9px 16px;font-family:var(--display);font-size:13px;font-weight:600;
-      color:#0a0b0d;background:var(--accent);border:none;border-radius:8px;
-      cursor:pointer;white-space:nowrap;transition:opacity 0.15s;
-    }
-    .btn-search:hover{opacity:0.88;}
-
-    /* GPS btn */
-    .btn-gps{
-      display:flex;align-items:center;gap:6px;
-      padding:9px 14px;font-family:var(--display);font-size:13px;font-weight:600;
-      color:var(--accent);background:var(--accent-dim);
-      border:1px solid rgba(74,222,128,0.25);border-radius:8px;
-      cursor:pointer;white-space:nowrap;transition:background 0.15s;
-    }
-    .btn-gps:hover{background:rgba(74,222,128,0.2);}
-    .btn-gps:disabled{opacity:0.4;cursor:not-allowed;}
+    .btn-search{padding:8px 14px;font-family:var(--display);font-size:13px;font-weight:600;color:#0a0b0d;background:var(--accent);border:none;border-radius:8px;cursor:pointer;transition:opacity .15s;}
+    .btn-search:hover{opacity:.88;}
+    .btn-gps{display:flex;align-items:center;gap:6px;padding:8px 13px;font-family:var(--display);font-size:13px;font-weight:600;color:var(--accent);background:var(--accent-dim);border:1px solid rgba(74,222,128,.25);border-radius:8px;cursor:pointer;white-space:nowrap;transition:background .15s;}
+    .btn-gps:hover{background:rgba(74,222,128,.2);}
+    .btn-gps:disabled{opacity:.4;cursor:not-allowed;}
 
     /* Layout */
     .main{display:flex;flex:1;overflow:hidden;}
-
-    /* Map */
     #map{flex:1;min-height:400px;cursor:crosshair;}
     .leaflet-container{background:#1a1c1f;}
 
     /* Sidebar */
-    .sidebar{
-      width:320px;min-width:280px;
-      background:var(--surface);
-      border-left:1px solid var(--border);
-      display:flex;flex-direction:column;
-      overflow-y:auto;
-    }
-    .sidebar-section{padding:16px 18px;border-bottom:1px solid var(--border);}
+    .sidebar{width:330px;min-width:280px;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;}
+    .sidebar-section{padding:15px 17px;border-bottom:1px solid var(--border);}
     .sidebar-section:last-child{border-bottom:none;}
-    .section-label{font-size:11px;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+    .slabel{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:9px;display:block;}
 
-    /* Coords display */
-    .coord-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;}
+    /* Coords */
+    .coord-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;}
     .coord-key{font-size:12px;color:var(--muted);}
     .coord-val{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);}
 
-    /* Zoom slider */
-    .zoom-row{display:flex;align-items:center;gap:10px;margin-top:8px;}
-    .zoom-row input[type=range]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:rgba(255,255,255,0.1);outline:none;}
+    /* Zoom */
+    .zoom-row{display:flex;align-items:center;gap:8px;margin-top:8px;}
+    .zoom-row input[type=range]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:rgba(255,255,255,.1);outline:none;}
     .zoom-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--surface);}
     .zoom-num{font-family:var(--mono);font-size:13px;min-width:22px;}
 
-    /* Label input */
-    .label-input{
-      width:100%;background:var(--surface2);border:1px solid var(--border);
-      border-radius:8px;padding:9px 12px;font-family:var(--mono);font-size:13px;
-      color:var(--text);outline:none;transition:border-color 0.15s;margin-top:4px;
-    }
+    /* Label */
+    .label-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 11px;font-family:var(--mono);font-size:13px;color:var(--text);outline:none;transition:border-color .15s;margin-top:4px;}
     .label-input:focus{border-color:var(--accent);}
     .label-input::placeholder{color:var(--muted);}
 
-    /* Generate btn */
-    .btn-gen{
-      width:100%;padding:12px;font-family:var(--display);font-size:14px;font-weight:700;
-      color:#0a0b0d;background:var(--accent);border:none;border-radius:10px;
-      cursor:pointer;transition:opacity 0.15s,transform 0.1s;margin-top:4px;
-    }
-    .btn-gen:hover{opacity:0.9;}
-    .btn-gen:active{transform:scale(0.98);}
-    .btn-gen:disabled{opacity:0.35;cursor:not-allowed;}
-
-    /* Code output */
-    .code-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-    .copy-btn{
-      display:flex;align-items:center;gap:5px;padding:4px 10px;font-size:11px;font-weight:600;
-      font-family:var(--display);color:var(--accent);background:var(--accent-dim);
-      border:1px solid rgba(74,222,128,0.2);border-radius:6px;cursor:pointer;
-    }
-    .copy-btn:hover{background:rgba(74,222,128,0.2);}
-    .code-box{
-      background:var(--surface2);border:1px solid var(--border);border-radius:8px;
-      padding:12px;font-family:var(--mono);font-size:11px;line-height:1.7;
-      color:#a0acb8;word-break:break-all;white-space:pre-wrap;
-      max-height:180px;overflow-y:auto;
-    }
-
-    /* Tip pill */
-    .tip{
-      font-size:11px;color:var(--muted);font-family:var(--mono);
-      background:var(--surface2);border-radius:6px;padding:8px 10px;
-      line-height:1.6;margin-bottom:8px;
-    }
-    .tip strong{color:var(--text);}
+    /* Buttons */
+    .btn-gen{width:100%;padding:11px;font-family:var(--display);font-size:14px;font-weight:700;color:#0a0b0d;background:var(--accent);border:none;border-radius:10px;cursor:pointer;transition:opacity .15s,transform .1s;}
+    .btn-gen:hover{opacity:.9;}
+    .btn-gen:active{transform:scale(.98);}
+    .btn-gen:disabled{opacity:.3;cursor:not-allowed;}
 
     /* Status */
-    .status-msg{font-size:12px;font-family:var(--mono);color:var(--muted);margin-top:6px;min-height:16px;}
+    .status-msg{font-size:12px;font-family:var(--mono);color:var(--muted);margin-top:7px;min-height:16px;}
     .status-msg.ok{color:var(--accent);}
-    .status-msg.err{color:#f87171;}
+    .status-msg.err{color:var(--red);}
 
-    /* Empty state */
-    .empty{text-align:center;padding:24px 16px;}
-    .empty-icon{font-size:32px;margin-bottom:8px;}
-    .empty p{font-size:13px;color:var(--muted);line-height:1.6;}
+    /* URL output */
+    .url-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:11px;line-height:1.65;color:#a0acb8;word-break:break-all;white-space:pre-wrap;max-height:90px;overflow-y:auto;margin-bottom:8px;}
+    .code-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:11px;line-height:1.65;color:#a0acb8;word-break:break-all;white-space:pre-wrap;max-height:140px;overflow-y:auto;}
 
-    /* Responsive */
+    .row-btns{display:flex;gap:7px;margin-bottom:8px;}
+    .copy-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 10px;font-size:11px;font-weight:600;font-family:var(--display);color:var(--accent);background:var(--accent-dim);border:1px solid rgba(74,222,128,.2);border-radius:7px;cursor:pointer;transition:background .15s;}
+    .copy-btn:hover{background:rgba(74,222,128,.2);}
+
+    /* Preview */
+    .preview-wrap{border-radius:9px;overflow:hidden;border:1px solid var(--border);}
+    .preview-wrap iframe{display:block;width:100%;height:190px;border:none;}
+
+    /* Tip */
+    .tip{font-size:11px;color:var(--muted);font-family:var(--mono);background:var(--surface2);border-radius:7px;padding:8px 10px;line-height:1.65;margin-bottom:9px;}
+    .tip strong{color:var(--text);}
+
     @media(max-width:640px){
       .main{flex-direction:column;}
       .sidebar{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--border);}
-      #map{min-height:280px;}
+      #map{min-height:260px;}
       .topbar{flex-direction:column;align-items:stretch;}
       .search-wrap{max-width:100%;}
     }
@@ -150,72 +98,76 @@
 </head>
 <body>
 
-<!-- Top bar -->
 <div class="topbar">
-  <div class="topbar-title">📍 Maps <span>Picker</span></div>
+  <div class="topbar-title">📍 Maps <span>Embed Picker</span></div>
   <div class="search-wrap">
-    <input type="text" id="searchInput" placeholder="Buscar lugar o dirección..." />
+    <input type="text" id="searchInput" placeholder="Buscar lugar o dirección..."/>
     <button class="btn-search" id="btnSearch">Buscar</button>
   </div>
   <button class="btn-gps" id="btnGps">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg>
-    Mi ubicación
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg>
+    Mi GPS
   </button>
 </div>
 
 <div class="main">
-  <!-- Map -->
   <div id="map"></div>
 
-  <!-- Sidebar -->
   <div class="sidebar">
 
     <div class="sidebar-section">
       <div class="tip">
-        <strong>3 formas de ubicar:</strong><br>
-        🖱 Clic en el mapa<br>
+        <strong>Cómo seleccionar:</strong><br>
+        🖱 Clic en cualquier punto del mapa<br>
         🔍 Busca una dirección arriba<br>
-        📍 Arrastra el marcador
+        🕹 Arrastra el marcador verde<br>
+        📍 Botón "Mi GPS" (requiere https)
       </div>
-      <div class="section-label">Coordenadas seleccionadas</div>
+      <span class="slabel">Coordenadas</span>
       <div class="coord-row"><span class="coord-key">Latitud</span><span class="coord-val" id="dispLat">—</span></div>
       <div class="coord-row"><span class="coord-key">Longitud</span><span class="coord-val" id="dispLng">—</span></div>
-      <div class="coord-row"><span class="coord-key">Dirección</span><span class="coord-val" id="dispAddr" style="font-size:11px;max-width:160px;text-align:right;color:var(--muted)">—</span></div>
+      <div class="coord-row"><span class="coord-key">Lugar</span><span class="coord-val" id="dispAddr" style="font-size:10px;max-width:170px;text-align:right;color:var(--muted);line-height:1.4">—</span></div>
     </div>
 
     <div class="sidebar-section">
-      <div class="section-label">Opciones del embed</div>
-      <label style="font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);">Zoom del mapa</label>
+      <span class="slabel">Opciones</span>
+      <label style="font-size:11px;color:var(--muted)">Zoom</label>
       <div class="zoom-row">
         <span style="font-size:10px;color:var(--muted)">5</span>
         <input type="range" min="5" max="20" value="15" id="zoomSlider"/>
         <span style="font-size:10px;color:var(--muted)">20</span>
         <span class="zoom-num" id="zoomNum">15</span>
       </div>
-      <label style="font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);display:block;margin-top:12px;margin-bottom:4px;">Etiqueta del marcador</label>
-      <input type="text" class="label-input" id="labelInput" placeholder="Ej: Mi restaurante, Oficina..."/>
+      <label style="font-size:11px;color:var(--muted);display:block;margin-top:10px;margin-bottom:3px">Etiqueta del marcador (opcional)</label>
+      <input type="text" class="label-input" id="labelInput" placeholder="Ej: Mi negocio, Oficina..."/>
     </div>
 
     <div class="sidebar-section">
       <button class="btn-gen" id="btnGen" disabled>Generar embed →</button>
-      <div class="status-msg" id="statusMsg">Selecciona un punto en el mapa primero</div>
+      <div class="status-msg" id="statusMsg">Selecciona un punto en el mapa</div>
     </div>
 
     <div class="sidebar-section" id="outputSection" style="display:none">
-      <div class="code-header">
-        <span class="section-label" style="margin:0">Código iframe</span>
-        <button class="copy-btn" id="copyBtn">
+      <span class="slabel">URL del embed</span>
+      <div class="url-box" id="urlBox"></div>
+      <div class="row-btns">
+        <button class="copy-btn" id="copyUrl">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Copiar
+          Copiar URL
+        </button>
+        <button class="copy-btn" id="copyIframe">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Copiar iframe
         </button>
       </div>
+      <span class="slabel">Código iframe completo</span>
       <div class="code-box" id="codeBox"></div>
     </div>
 
     <div class="sidebar-section" id="previewSection" style="display:none">
-      <div class="section-label">Vista previa</div>
-      <div style="border-radius:10px;overflow:hidden;border:1px solid var(--border);">
-        <iframe id="previewFrame" width="100%" height="200" frameborder="0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <span class="slabel">Vista previa</span>
+      <div class="preview-wrap">
+        <iframe id="previewFrame" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div>
     </div>
 
@@ -223,148 +175,148 @@
 </div>
 
 <script>
-  // Init map
-  const map = L.map('map', {zoomControl:true}).setView([19.4270, -99.1687], 12);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution:'© OpenStreetMap',maxZoom:20
-  }).addTo(map);
+  const map = L.map('map',{zoomControl:true}).setView([20.883483,-76.254414],15);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:20}).addTo(map);
 
-  // Custom marker icon
   const markerIcon = L.divIcon({
     className:'',
-    html:`<div style="width:28px;height:28px;background:#4ade80;border:3px solid #0e0f11;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,0.5)"></div>`,
-    iconSize:[28,28],iconAnchor:[14,28],
+    html:`<div style="width:26px;height:26px;background:#4ade80;border:3px solid #0e0f11;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 10px rgba(0,0,0,.6)"></div>`,
+    iconSize:[26,26],iconAnchor:[13,26]
   });
 
-  let marker = null;
-  let selLat = null, selLng = null;
+  let marker=null, selLat=null, selLng=null;
 
-  const dispLat    = document.getElementById('dispLat');
-  const dispLng    = document.getElementById('dispLng');
-  const dispAddr   = document.getElementById('dispAddr');
-  const zoomSlider = document.getElementById('zoomSlider');
-  const zoomNum    = document.getElementById('zoomNum');
-  const labelInput = document.getElementById('labelInput');
-  const btnGen     = document.getElementById('btnGen');
-  const statusMsg  = document.getElementById('statusMsg');
-  const outputSection = document.getElementById('outputSection');
-  const previewSection = document.getElementById('previewSection');
-  const codeBox    = document.getElementById('codeBox');
-  const previewFrame = document.getElementById('previewFrame');
-  const copyBtn    = document.getElementById('copyBtn');
-  const searchInput = document.getElementById('searchInput');
-  const btnSearch  = document.getElementById('btnSearch');
-  const btnGps     = document.getElementById('btnGps');
+  const dispLat=document.getElementById('dispLat');
+  const dispLng=document.getElementById('dispLng');
+  const dispAddr=document.getElementById('dispAddr');
+  const zoomSlider=document.getElementById('zoomSlider');
+  const zoomNum=document.getElementById('zoomNum');
+  const labelInput=document.getElementById('labelInput');
+  const btnGen=document.getElementById('btnGen');
+  const statusMsg=document.getElementById('statusMsg');
+  const outputSection=document.getElementById('outputSection');
+  const previewSection=document.getElementById('previewSection');
+  const urlBox=document.getElementById('urlBox');
+  const codeBox=document.getElementById('codeBox');
+  const previewFrame=document.getElementById('previewFrame');
+  const copyUrl=document.getElementById('copyUrl');
+  const copyIframe=document.getElementById('copyIframe');
+  const searchInput=document.getElementById('searchInput');
+  const btnSearch=document.getElementById('btnSearch');
+  const btnGps=document.getElementById('btnGps');
 
-  zoomSlider.addEventListener('input', () => { zoomNum.textContent = zoomSlider.value; });
+  zoomSlider.addEventListener('input',()=>{ zoomNum.textContent=zoomSlider.value; });
 
-  function setPoint(lat, lng, addr) {
-    selLat = lat; selLng = lng;
-    dispLat.textContent = lat.toFixed(6);
-    dispLng.textContent = lng.toFixed(6);
-    dispAddr.textContent = addr || '—';
-    btnGen.disabled = false;
-    statusMsg.className = 'status-msg ok';
-    statusMsg.textContent = '✓ Punto seleccionado';
+  // Generar URL formato embed de Google Maps
+  function buildEmbedUrl(lat,lng,zoom,label){
+    const q = label
+      ? encodeURIComponent(label)+'@'+lat+','+lng
+      : lat+','+lng;
+    return `https://www.google.com/maps/embed/v1/place?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&q=${lat},${lng}&zoom=${zoom}`;
+  }
 
-    if (marker) {
-      marker.setLatLng([lat, lng]);
-    } else {
-      marker = L.marker([lat, lng], {icon: markerIcon, draggable: true}).addTo(map);
-      marker.on('dragend', e => {
-        const p = e.target.getLatLng();
-        reverseGeocode(p.lat, p.lng);
+  // Fallback sin API key — funciona siempre
+  function buildEmbedUrlFree(lat,lng,zoom,label){
+    const q = label
+      ? encodeURIComponent(label)+'@'+lat+','+lng
+      : lat+','+lng;
+    return `https://maps.google.com/maps?q=${q}&z=${zoom}&output=embed&hl=es`;
+  }
+
+  function buildIframe(url){
+    return `<iframe\n  width="600"\n  height="450"\n  style="border:0;"\n  src="${url}"\n  allowfullscreen=""\n  loading="lazy"\n  referrerpolicy="no-referrer-when-downgrade">\n</iframe>`;
+  }
+
+  function setPoint(lat,lng,addr){
+    selLat=lat; selLng=lng;
+    dispLat.textContent=lat.toFixed(6);
+    dispLng.textContent=lng.toFixed(6);
+    dispAddr.textContent=addr||'—';
+    btnGen.disabled=false;
+    statusMsg.className='status-msg ok';
+    statusMsg.textContent='✓ Punto seleccionado';
+    if(marker){ marker.setLatLng([lat,lng]); }
+    else {
+      marker=L.marker([lat,lng],{icon:markerIcon,draggable:true}).addTo(map);
+      marker.on('dragend',e=>{
+        const p=e.target.getLatLng();
+        reverseGeocode(p.lat,p.lng);
       });
     }
   }
 
-  // Click on map
-  map.on('click', e => {
-    reverseGeocode(e.latlng.lat, e.latlng.lng);
-  });
+  map.on('click',e=>{ reverseGeocode(e.latlng.lat,e.latlng.lng); });
 
-  // Reverse geocode with Nominatim
-  function reverseGeocode(lat, lng) {
-    dispAddr.textContent = '...';
+  function reverseGeocode(lat,lng){
+    dispAddr.textContent='...';
     fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
-      .then(r => r.json())
-      .then(d => {
-        const addr = d.display_name ? d.display_name.split(',').slice(0,3).join(', ') : '';
-        setPoint(lat, lng, addr);
-        map.panTo([lat, lng]);
+      .then(r=>r.json())
+      .then(d=>{
+        const addr=d.display_name?d.display_name.split(',').slice(0,3).join(', '):'';
+        setPoint(lat,lng,addr);
+        map.panTo([lat,lng]);
       })
-      .catch(() => setPoint(lat, lng, ''));
+      .catch(()=>setPoint(lat,lng,''));
   }
 
-  // Search
-  function doSearch() {
-    const q = searchInput.value.trim();
-    if (!q) return;
-    statusMsg.className = 'status-msg';
-    statusMsg.textContent = 'Buscando...';
+  function doSearch(){
+    const q=searchInput.value.trim(); if(!q)return;
+    statusMsg.className='status-msg'; statusMsg.textContent='Buscando...';
     fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`)
-      .then(r => r.json())
-      .then(data => {
-        if (!data.length) { statusMsg.textContent = 'No se encontró ese lugar.'; return; }
-        const r = data[0];
-        map.setView([r.lat, r.lon], 15);
-        reverseGeocode(parseFloat(r.lat), parseFloat(r.lon));
+      .then(r=>r.json())
+      .then(data=>{
+        if(!data.length){statusMsg.textContent='No encontrado.';return;}
+        map.setView([+data[0].lat,+data[0].lon],15);
+        reverseGeocode(+data[0].lat,+data[0].lon);
       })
-      .catch(() => { statusMsg.textContent = 'Error al buscar.'; });
+      .catch(()=>{statusMsg.className='status-msg err';statusMsg.textContent='Error al buscar.';});
   }
-  btnSearch.addEventListener('click', doSearch);
-  searchInput.addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
+  btnSearch.addEventListener('click',doSearch);
+  searchInput.addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
 
-  // GPS
-  btnGps.addEventListener('click', () => {
-    if (!navigator.geolocation) { statusMsg.textContent = 'GPS no disponible.'; return; }
-    btnGps.disabled = true;
-    statusMsg.textContent = 'Obteniendo ubicación...';
-    navigator.geolocation.getCurrentPosition(pos => {
-      btnGps.disabled = false;
-      map.setView([pos.coords.latitude, pos.coords.longitude], 16);
-      reverseGeocode(pos.coords.latitude, pos.coords.longitude);
-    }, () => {
-      btnGps.disabled = false;
-      statusMsg.className = 'status-msg err';
-      statusMsg.textContent = 'Permiso de GPS denegado.';
-    }, {enableHighAccuracy:true, timeout:10000});
+  btnGps.addEventListener('click',()=>{
+    if(!navigator.geolocation){statusMsg.className='status-msg err';statusMsg.textContent='GPS no disponible.';return;}
+    btnGps.disabled=true; statusMsg.textContent='Obteniendo GPS...';
+    navigator.geolocation.getCurrentPosition(pos=>{
+      btnGps.disabled=false;
+      map.setView([pos.coords.latitude,pos.coords.longitude],16);
+      reverseGeocode(pos.coords.latitude,pos.coords.longitude);
+    },()=>{
+      btnGps.disabled=false;
+      statusMsg.className='status-msg err';
+      statusMsg.textContent='Permiso GPS denegado.';
+    },{enableHighAccuracy:true,timeout:10000});
   });
 
-  // Build embed
-  function buildUrl(lat, lng, zoom, label) {
-    const q = label ? encodeURIComponent(label)+'@'+lat+','+lng : lat+','+lng;
-    return `https://maps.google.com/maps?q=${q}&z=${zoom}&output=embed`;
-  }
-  function buildCode(lat, lng, zoom, label) {
-    return `<iframe\n  src="${buildUrl(lat,lng,zoom,label)}"\n  width="600"\n  height="450"\n  style="border:0;"\n  allowfullscreen=""\n  loading="lazy"\n  referrerpolicy="no-referrer-when-downgrade">\n</iframe>`;
-  }
-
-  btnGen.addEventListener('click', () => {
-    if (!selLat) return;
-    const zoom = zoomSlider.value;
-    const label = labelInput.value.trim();
-    const url = buildUrl(selLat.toFixed(6), selLng.toFixed(6), zoom, label);
-    codeBox.textContent = buildCode(selLat.toFixed(6), selLng.toFixed(6), zoom, label);
-    previewFrame.src = url;
-    outputSection.style.display = 'block';
-    previewSection.style.display = 'block';
+  btnGen.addEventListener('click',()=>{
+    if(!selLat)return;
+    const zoom=zoomSlider.value;
+    const label=labelInput.value.trim();
+    const url=buildEmbedUrlFree(selLat.toFixed(6),selLng.toFixed(6),zoom,label);
+    const iframe=buildIframe(url);
+    urlBox.textContent=url;
+    codeBox.textContent=iframe;
+    previewFrame.src=url;
+    outputSection.style.display='block';
+    previewSection.style.display='block';
     outputSection.scrollIntoView({behavior:'smooth'});
   });
 
-  // Copy
-  copyBtn.addEventListener('click', () => {
-    const text = codeBox.textContent;
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(text).then(() => {
-        copyBtn.textContent = '✓ Copiado';
-        setTimeout(() => { copyBtn.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar`; }, 2000);
+  function copyText(text,btn,label){
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(text).then(()=>{
+        btn.textContent='✓ Copiado';
+        setTimeout(()=>{btn.textContent=label;},2000);
       });
     } else {
-      const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
-      copyBtn.textContent='✓ Copiado';setTimeout(()=>{copyBtn.textContent='Copiar';},2000);
+      const ta=document.createElement('textarea');ta.value=text;
+      document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+      btn.textContent='✓ Copiado';setTimeout(()=>{btn.textContent=label;},2000);
     }
-  });
+  }
+
+  copyUrl.addEventListener('click',()=>copyText(urlBox.textContent,copyUrl,'Copiar URL'));
+  copyIframe.addEventListener('click',()=>copyText(codeBox.textContent,copyIframe,'Copiar iframe'));
 </script>
 </body>
 </html>
